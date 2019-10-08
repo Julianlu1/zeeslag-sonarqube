@@ -23,7 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seabattlegame.ISeaBattleGame;
 import seabattlegame.SeaBattleGame;
+import seabattlegame.classes.Ship;
+import seabattlegame.classes.Square;
 
+import java.util.List;
 
 
 /**
@@ -697,7 +700,7 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
         // Show the error message as an alert message
         showMessage(errorMessage);
     }
-    
+
     /**
      * Set the color of the square according to position type.
      * Setting the color will be performed by the JavaFX Application Thread.
@@ -710,6 +713,7 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+
                 switch (squareState) {
                     case WATER:
                         square.setFill(Color.LIGHTBLUE);
@@ -749,6 +753,22 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
             return;
         }
         game.registerPlayer(playerName, playerPassword, this, singlePlayerMode);
+        setControlVisibility(true);
+    }
+
+    private void setControlVisibility(boolean bool) {
+        buttonPlaceCruiser.setDisable(!bool);
+        buttonPlaceBattleShip.setDisable(!bool);
+        buttonPlaceAircraftCarrier.setDisable(!bool);
+        buttonPlaceSubmarine.setDisable(!bool);
+        buttonPlaceMineSweeper.setDisable(!bool);
+        radioHorizontal.setDisable(!bool);
+        radioVertical.setDisable(!bool);
+        buttonRemoveShip.setDisable(!bool);
+        buttonReadyToPlay.setDisable(!bool);
+        buttonPlaceAllShips.setDisable(!bool);
+        buttonRemoveAllShips.setDisable(!bool);
+        labelHorizontalVertical.setDisable(!bool);
     }
     
     /**
@@ -764,7 +784,13 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
      */
     private void removeAllShips() {
         // Remove the player's ships
-        game.removeAllShips(playerNr);
+        List<Ship> ships = game.removeAllShips(playerNr);
+        for(Ship ship : ships){
+            for(Square s : ship.getSquares()){
+                Rectangle r = squaresOceanArea[s.getPositionX()][s.getPositionY()];
+                setSquareColor(r,SquareState.WATER);
+            }
+        }
     }
     
     /**
@@ -807,7 +833,20 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
         if (squareSelectedInOceanArea) {
             int bowX = selectedSquareX;
             int bowY = selectedSquareY;
-            game.placeShip(playerNr, shipType, bowX, bowY, horizontal);
+            Ship chosenShip = game.placeShip(playerNr, shipType, bowX, bowY, horizontal);
+            // Loop door de ship met lijst van squares
+            // Als de state van de square SHIP is, wordt de state in de GUI veranderd naar SHIP
+            if(chosenShip != null){
+                for(Square s : chosenShip.getSquares()){
+                    if(s.getState().equals(SquareState.SHIP)){
+                        Rectangle r = squaresOceanArea[s.getPositionX()][s.getPositionY()];
+                        setSquareColor(r,SquareState.SHIP);
+                    }
+                }
+            }else{
+                showMessage("Fout bij plaatsen schip");
+            }
+
         }
         else {
             showMessage("Select square in " + playerName + "\'s grid to place ship");

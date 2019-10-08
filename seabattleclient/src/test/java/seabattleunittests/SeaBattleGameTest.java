@@ -35,7 +35,7 @@ class SeaBattleGameTest {
     void setUp() {
         
         // Create the Sea Battle game
-        game = new SeaBattleGame();
+        //game = new SeaBattleGame();
         
         // Create mock Sea Battle GUI for player
         applicationPlayer = new MockSeaBattleApplication();

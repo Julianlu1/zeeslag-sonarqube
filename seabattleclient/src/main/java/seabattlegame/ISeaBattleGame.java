@@ -3,8 +3,11 @@
  */
 package seabattlegame;
 
+import seabattlegame.classes.Ship;
 import seabattlegui.ISeaBattleGUI;
 import seabattlegui.ShipType;
+
+import java.util.List;
 
 /**
  * Interface provided by the Sea Battle game to the graphical user interface.
@@ -55,7 +58,7 @@ public interface ISeaBattleGame {
      * @param bowY       y-coordinate of bow
      * @param horizontal indicate whether ship will placed horizontally or vertically
      */
-    public void placeShip(int playerNr, ShipType shipType, int bowX, int bowY, boolean horizontal);
+    public Ship placeShip(int playerNr, ShipType shipType, int bowX, int bowY, boolean horizontal);
 
     /**
      * Remove the ship that is placed at the square with coordinates (posX, posY).
@@ -73,7 +76,7 @@ public interface ISeaBattleGame {
      * showSquarePlayer().
      * @param playerNr  identification of player for which ships will be removed
      */
-    public void removeAllShips(int playerNr);
+    public List<Ship> removeAllShips(int playerNr);
 
     /**
      * Notify that the player is ready to play the game, i.e., all ships have
