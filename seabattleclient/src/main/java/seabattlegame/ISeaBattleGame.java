@@ -40,7 +40,7 @@ public interface ISeaBattleGame {
      * showSquarePlayer().
      * @param playerNr identification of player for which ships will be placed
      */
-    public void placeShipsAutomatically(int playerNr);
+    public List<Ship> placeShipsAutomatically(int playerNr);
 
     /**
      * Place ship of given type. A ship of given type will be placed with its 

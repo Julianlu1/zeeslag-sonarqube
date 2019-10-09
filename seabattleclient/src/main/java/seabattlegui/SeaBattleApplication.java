@@ -26,6 +26,7 @@ import seabattlegame.SeaBattleGame;
 import seabattlegame.classes.Ship;
 import seabattlegame.classes.Square;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -776,7 +777,16 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
      */
     private void placeShipsAutomatically() {
         // Place the player's ships automatically.
-        game.placeShipsAutomatically(playerNr);
+        List<Ship> ships = new ArrayList<>();
+        ships = game.placeShipsAutomatically(playerNr);
+
+        for(Ship ship : ships){
+                for(Square s : ship.getSquares()){
+                    Rectangle r = squaresOceanArea[s.getPositionX()][s.getPositionY()];
+                    setSquareColor(r,SquareState.SHIP);
+                }
+            }
+            //ships = game.placeShipsAutomatically(1);
     }
     
     /**
@@ -798,7 +808,19 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
      */
     private void notifyWhenReady() {
         // Notify that the player is ready is start the game.
-        game.notifyWhenReady(playerNr);
+
+        // Setup computer grid
+        List<Ship> ships = new ArrayList<>();
+        ships = game.placeShipsAutomatically(1);
+
+        for(Ship ship : ships){
+            for(Square s : ship.getSquares()){
+                Rectangle r = squaresTargetArea[s.getPositionX()][s.getPositionY()];
+                setSquareColor(r,SquareState.SHIP);
+            }
+        }
+
+        notifyStartGame(0);
     }
     
     /**
@@ -849,7 +871,7 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
 
         }
         else {
-            showMessage("Select square in " + playerName + "\'s grid to place ship");
+            //showMessage("Select square in " + playerName + "\'s grid to place ship");
         }
     }
     
@@ -904,7 +926,6 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
                 // It is this player's turn
                 // Player fires a shot at the selected target area
                 game.fireShot(playerNr,x,y);
-                
                 // Opponent's turn
                 switchTurn();
             }

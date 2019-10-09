@@ -14,6 +14,7 @@ import seabattlegui.SquareState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * The Sea Battle game. To be implemented.
@@ -58,21 +59,84 @@ public class SeaBattleGame implements ISeaBattleGame {
     }
 
     Player player = new Player(name,false);
+    Player player2 = new Player("Computer",false);
     game.addPlayer(player);
+      game.addPlayer(player2);
 
   }
 
   @Override
-  public void placeShipsAutomatically(int playerNr) {
-    Player player = game.getCurrentPlayerByNumber(playerNr);
+  public List<Ship> placeShipsAutomatically(int playerNr) {
+
+      Player player = game.getCurrentPlayerByNumber(playerNr);
     Grid grid = player.getGrid();
     List<Square> squares = grid.getSquares();
+    List<Ship> ships = player.getShips();
+
+    List<Ship> lstShipsFilled = new ArrayList<>();
+    for(Ship ship : ships){
+      ship.getSquares().clear();
+    }
+    Random random = new Random();
+
+      for(Ship ship : ships){
+
+          int shipLength = 0;
+
+          switch (ship.getType()){
+              case AIRCRAFTCARRIER:
+                  shipLength=5;
+                  break;
+              case BATTLESHIP:
+                  shipLength = 4;
+                  break;
+              case CRUISER:
+              case SUBMARINE:
+                  shipLength =3;
+                  break;
+              case MINESWEEPER:
+                  shipLength=2;
+                  break;
+          }
+          boolean shipPlaced = false;
+          // While de schip niet geplaatst is, blijf het proberen
+          while(!shipPlaced){
+              int bowX = random.nextInt(8);
+              int bowY = random.nextInt(8);
+              boolean horizontal = Math.random() < 0.5;
+
+              Square chosenSquare = getChosenSquare(squares,bowX,bowY);
+
+              if(checkSafeToAdd(shipLength,horizontal,chosenSquare,squares)){
+                  for(int i = 0; i <shipLength;i++){
+                      if(horizontal){
+                          int x = chosenSquare.getPositionX() +i;
+                          Square s = getChosenSquare(squares,x,chosenSquare.getPositionY());
+                          s.setSquareState(SquareState.SHIP);
+                          ship.addSquare(s);
+                          shipPlaced = true;
+                      }else{
+                          int y = chosenSquare.getPositionY() +i;
+                          Square s = getChosenSquare(squares,chosenSquare.getPositionX(),y);
+                          s.setSquareState(SquareState.SHIP);
+                          ship.addSquare(s);
+                          shipPlaced = true;
+                      }
+                  }
+                  lstShipsFilled.add(ship);
+              }
+          }
+      }
+
+      //ships.add(chosenShip);
+    return lstShipsFilled;
+
     //throw new UnsupportedOperationException("Method placeShipsAutomatically() not implemented.");
   }
 
  @Override
  public Ship placeShip(int playerNr, ShipType shipType, int bowX, int bowY, boolean horizontal) {
-   boolean found = false;
+   boolean safeToAdd = false;
     // Get all squares
     Player player = game.getCurrentPlayerByNumber(playerNr);
 
@@ -100,77 +164,61 @@ public class SeaBattleGame implements ISeaBattleGame {
     Square chosenSquare = getChosenSquare(squares,bowX,bowY);
     Ship chosenShip = player.getShipByType(shipType);
 
-  for(int i = 0; i < shipLength ; i++){
-    assert chosenSquare != null;
-    if(horizontal){
-        int x = chosenSquare.getPositionX() + i; // Steeds 1 erbij optellen
-        Square s = getChosenSquare(squares,x,chosenSquare.getPositionY()); // De volgende square pakken || getPositionY is steeds dezelfde locatie
-        // Als de Square al een ship heeft, is er overlapping
-        if(s.getState().equals(SquareState.SHIP)){
-          return null;
+     List<Ship> playerShips = player.getShips();
+     // Als het veilig is om een schip te plaatsen en er geen duplicaten zijn van schepen
+    if(checkSafeToAdd(shipLength,horizontal,chosenSquare,squares) && checkForMultipleShips(playerShips,shipType)){
+        for(int i = 0; i < shipLength ; i++){
+            assert chosenSquare != null;
+            if(horizontal){
+                int x = chosenSquare.getPositionX() + i; // Steeds 1 erbij optellen
+                Square s = getChosenSquare(squares,x,chosenSquare.getPositionY()); // De volgende square pakken || getPositionY is steeds dezelfde locatie
+                // Als de Square al een ship heeft, is er overlapping
+                playerShips.removeIf(ship-> ship.getType().equals(shipType));
+                s.setSquareState(SquareState.SHIP); // Set state naar SHIP
+                chosenShip.addSquare(s);
+            }else{
+                int y = chosenSquare.getPositionY() + i; // Steeds 1 erbij optellen
+                Square s = getChosenSquare(squares,chosenSquare.getPositionX(),y); // De volgende square pakken
+                s.setSquareState(SquareState.SHIP); // Set state naar SHIP
+                playerShips.removeIf(ship-> ship.getType().equals(shipType));
+                chosenShip.addSquare(s);
+            }
         }
-        s.setSquareState(SquareState.SHIP); // Set state naar SHIP
-        chosenShip.addSquare(s);
     }else{
-        int y = chosenSquare.getPositionY() + i; // Steeds 1 erbij optellen
-        Square s = getChosenSquare(squares,chosenSquare.getPositionX(),y); // De volgende square pakken
-        // Als de Square al een ship heeft, is er overlapping
-        if(s.getState().equals(SquareState.SHIP)){
-          return null;
-        }
-        s.setSquareState(SquareState.SHIP); // Set state naar SHIP
-        chosenShip.addSquare(s);
-      }
+        return null;
     }
+
   return chosenShip;
  }
-//  @Override
-//  public void placeShip(int playerNr, ShipType shipType, int bowX, int bowY, boolean horizontal) {
-//    boolean found = false;
-//    // Get all squares
-//    Player player = game.getCurrentPlayerByNumber(playerNr);
-//
-//    Grid grid = player.getGrid();
-//    List<Square> squares = grid.getSquares();
-//
-//    int shipLength = 0;
-//
-//    switch(shipType){
-//      case AIRCRAFTCARRIER:
-//        shipLength = 5;
-//        break;
-//      case BATTLESHIP:
-//        shipLength = 4;
-//        break;
-//      case CRUISER:
-//      case SUBMARINE:
-//        shipLength = 3;
-//        break;
-//      case MINESWEEPER:
-//        shipLength = 2;
-//        break;
-//    }
-//
-//    Square chosenSquare = getChosenSquare(squares,bowX,bowY);
-//    Ship chosenShip = player.getShipByType(shipType);
-//
-//  for(int i = 0; i < shipLength ; i++){
-//    assert chosenSquare != null;
-//    if(horizontal){
-//        int x = chosenSquare.getPositionX() + i; // Steeds 1 erbij optellen
-//        Square s = getChosenSquare(squares,x,chosenSquare.getPositionY()); // De volgende square pakken || getPositionY is steeds dezelfde locatie
-//        s.setSquareState(SquareState.SHIP); // Set state naar SHIP
-//        chosenShip.addSquare(s);
-//    }else{
-//        int y = chosenSquare.getPositionY() + i; // Steeds 1 erbij optellen
-//        Square s = getChosenSquare(squares,chosenSquare.getPositionX(),y); // De volgende square pakken
-//        s.setSquareState(SquareState.SHIP); // Set state naar SHIP
-//        chosenShip.addSquare(s);
-//      }
-//    }
-//
-//    //updateTileColors(chosenShip);
-//  }
+
+ private boolean checkSafeToAdd(int shiplength,boolean horizontal,Square chosensquare,List<Square> squares){
+    for(int i = 0; i < shiplength; i++){
+        if(horizontal){
+            int x = chosensquare.getPositionX() +i; // De volgende X positie
+            Square s = getChosenSquare(squares,x,chosensquare.getPositionY());
+            if(s.getState().equals(SquareState.SHIP) || x < 0 || x > 9){
+                return false;
+            }
+        }else{
+            int y = chosensquare.getPositionY() +i; // De volgende Y positie
+            Square s = getChosenSquare(squares,chosensquare.getPositionX(),y);
+            if(s.getState().equals(SquareState.SHIP) || y < 0 || y > 9){
+                return false;
+            }
+        }
+    }
+     return true;
+ }
+
+ private boolean checkForMultipleShips(List<Ship> ships, ShipType shiptype){
+      for(Ship s : ships){
+          if(s.getType().equals(shiptype)){
+              return true;
+          }
+      }
+      return false;
+ }
+
 
   private Square getChosenSquare(List<Square> squares, int x, int y) {
     // Loop door alle squares
@@ -195,18 +243,25 @@ public class SeaBattleGame implements ISeaBattleGame {
     for(Square s : squares){
         s.setSquareState(SquareState.WATER);
     }
+    for(Ship ship: player.getShips()){
+        for(Square square : ship.getSquares()){
+            square.setSquareState(SquareState.WATER);
+        }
+    }
     return player.getShips();
     //throw new UnsupportedOperationException("Method removeAllShips() not implemented.");
   }
 
   @Override
   public void notifyWhenReady(int playerNr) {
+
     throw new UnsupportedOperationException("Method notifyWhenReady() not implemented.");
   }
 
   @Override
   public void fireShot(int playerNr, int posX, int posY) {
-    throw new UnsupportedOperationException("Method fireShot() not implemented.");
+
+      //throw new UnsupportedOperationException("Method fireShot() not implemented.");
   }
 
   @Override
