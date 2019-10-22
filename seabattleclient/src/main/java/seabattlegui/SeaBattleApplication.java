@@ -26,6 +26,7 @@ import seabattlegame.SeaBattleGame;
 import seabattlegame.classes.Ship;
 import seabattlegame.classes.Square;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -925,9 +926,14 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
             if (playersTurn()) {
                 // It is this player's turn
                 // Player fires a shot at the selected target area
-                game.fireShot(playerNr,x,y);
+                Square square = game.fireShot(1,x,y);
+                //Rectangle r = new Rectangle(x,y);
+                Rectangle r = squaresTargetArea[square.getPositionX()][square.getPositionY()];
+
+                setSquareColor(r,square.getState());
+                showMessage(square.getState().toString());
                 // Opponent's turn
-                switchTurn();
+                //switchTurn();
             }
             else {
                 // It is not this player's turn yet

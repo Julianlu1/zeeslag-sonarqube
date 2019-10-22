@@ -3,18 +3,17 @@
  */
 package seabattlegame;
 
-import javafx.scene.shape.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seaBattleLogin.SeaBattleLogin;
 import seabattlegame.classes.*;
 import seabattlegui.ISeaBattleGUI;
 import seabattlegui.ShipType;
+import seabattlegui.ShotType;
 import seabattlegui.SquareState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The Sea Battle game. To be implemented.
@@ -58,10 +57,14 @@ public class SeaBattleGame implements ISeaBattleGame {
       throw new IllegalArgumentException("Name is null");
     }
 
+    //application.setOpponentName(1, "cpu");
     Player player = new Player(name,false);
     Player player2 = new Player("Computer",false);
     game.addPlayer(player);
-      game.addPlayer(player2);
+    game.addPlayer(player2);
+
+      SeaBattleLogin seaBattleLogin = new SeaBattleLogin();
+      seaBattleLogin.registerPlayer(name,password);
 
   }
 
@@ -259,9 +262,73 @@ public class SeaBattleGame implements ISeaBattleGame {
   }
 
   @Override
-  public void fireShot(int playerNr, int posX, int posY) {
+  public Square fireShot(int playerNr, int posX, int posY) {
+      Player player = game.getCurrentPlayerByNumber(playerNr);
+      List<Ship> ships = player.getShips();
 
-      //throw new UnsupportedOperationException("Method fireShot() not implemented.");
+      Grid playerGrid = player.getGrid();
+      List<Square> squares = playerGrid.getSquares();
+
+      Square chosenSquare = getChosenSquare(squares,posX,posY);
+
+      // Controleer wat de state is van de geschoten square
+      // Loop door alle squares van de speler
+      // Zoek naar de geschoten square en verander de state en shottype
+      if(chosenSquare.getState() == SquareState.SHIP){
+          for(Square s : playerGrid.getSquares()){
+              if(s.getPositionY() == chosenSquare.getPositionY() && s.getPositionX() == chosenSquare.getPositionX()){
+                  s.setSquareState(SquareState.SHOTHIT);
+                  s.setShotType(ShotType.HIT);
+              }
+          }
+      }else{
+          for(Square s : playerGrid.getSquares()){
+              if(s.getPositionY() == chosenSquare.getPositionY() && s.getPositionX() == chosenSquare.getPositionX()){
+                  s.setSquareState(SquareState.SHOTMISSED);
+                  s.setShotType(ShotType.MISSED);
+              }
+          }
+      }
+
+      // Loop door de lijst van schepen van de speler
+      // Loop door de squares van elk schip
+      // Als elke squarestate van een schip gelijk is aan "SHOTHIT", en dat komt door de laatst geschoten square
+      // Verander state naar Sunk
+
+      for(Ship ship : ships){
+
+          int array[] = new int[ship.getSquares().size()];
+          ArrayList arrayList = new ArrayList();  // Als de array allemaal 1 bevat, is het schip gezonken
+
+          for (int i = 0; i < ship.getSquares().size(); i++) {
+              arrayList.add(array[0]);
+          }
+
+          int counter =0;
+          for(Square s : ship.getSquares()){
+              if(s.getState() == SquareState.SHOTHIT){
+                  arrayList.set(counter,1);
+                  counter++;
+              }else
+              {
+                  arrayList.set(counter,0);
+                  counter++;
+              }
+              if(!arrayList.contains(0)){
+                  chosenSquare.setSquareState(SquareState.SHIPSUNK);
+                  chosenSquare.setShotType(ShotType.SUNK);
+              }
+          }
+      }
+
+      // De chosensquare returnen van de speler grid
+      for(Square s : playerGrid.getSquares()){
+          if(chosenSquare.getPositionX() == s.getPositionX() && chosenSquare.getPositionY() == s.getPositionY()){
+              return s;
+          }
+      }
+
+      return null;
   }
 
   @Override

@@ -2,11 +2,13 @@ package seabattlegame.classes;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import seabattlegui.ShotType;
 import seabattlegui.SquareState;
 
 public class Square {
     private Rectangle reee;
     private SquareState state;
+    private ShotType shotType;
     private int positionX;
     private int positionY;
 
@@ -43,6 +45,18 @@ public class Square {
 
     public SquareState getState() {
         return state;
+    }
+
+    public void setState(SquareState state) {
+        this.state = state;
+    }
+
+    public ShotType getShotType() {
+        return shotType;
+    }
+
+    public void setShotType(ShotType shotType) {
+        this.shotType = shotType;
     }
 
     public int getPositionX() {

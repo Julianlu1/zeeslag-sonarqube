@@ -4,9 +4,13 @@
 package seabattlegame;
 
 import seabattlegame.classes.Ship;
+import seabattlegame.classes.Square;
 import seabattlegui.ISeaBattleGUI;
 import seabattlegui.ShipType;
+import seabattlegui.ShotType;
+import seabattlegui.SquareState;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -107,7 +111,7 @@ public interface ISeaBattleGame {
      * @param posX     x-coordinate of square
      * @param posY     y-coordinate of square
      */
-    public void fireShot(int playerNr, int posX, int posY);
+    public Square fireShot(int playerNr, int posX, int posY);
     
     /**
      * Start a new game. Remove all ships and unregister the player.
