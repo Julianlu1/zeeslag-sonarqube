@@ -1,48 +1,72 @@
 package seaBattleLogin;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-//import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import com.google.gson.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-import java.util.HashMap;
+
 
 
 public class SeaBattleLogin implements ISeaBattleLogin {
 
     @Override
     public void registerPlayer(String name, String password){
-        var values = new HashMap<String, String>() {{
-            put("email", "julianblauw12345@hotmail.com");
-            put ("password", "Appeltaart16!");
-            put ("firstName", "Julian");
-            put ("lastName", "Lu");
-        }};
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 
+            var request = new HttpPost("https://seabattle-s3.herokuapp.com/auth/register");
+            request.setHeader("Content-type", "application/json");
+            //request.setEntity(new StringEntity("{\"email\":\"julianblauw1234567891000@hotmail.com\",\"password\":\"Appeltaart16!\",\"firstName\":\"julian\",\"lastName\":\"Lu\"} "));
 
+            Gson gson = new Gson();
+            User user = new User()
+            {{
+                email = name;
+                password = password;
+                lastName = "1";
+                firstName = "Player";
+            }};
 
-        /*
- HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://seabattle-s3.herokuapp.com/auth/register"))
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+            String jsonString =  gson.toJson(user, User.class);
+            request.setEntity(new StringEntity(jsonString));
+            HttpResponse response = client.execute(request);
 
-        HttpResponse<String> response = null;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+                String body= new String(response.getEntity().getContent().readAllBytes());
+
+                Response resp = gson.fromJson(body, Response.class);
+                String id = resp.user.id;
+            } else {
+                System.out.println(response.getEntity());
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-        System.out.println(response.body());
 
-         */
     }
 
     @Override
     public void loginPlayer(String name, String password) {
 
     }
+}
+
+class Response {
+    String token;
+    User user;
+}
+
+class User {
+    public String id;
+    public String firstName;
+    public String lastName;
+    public String email;
+    public String password;
 }

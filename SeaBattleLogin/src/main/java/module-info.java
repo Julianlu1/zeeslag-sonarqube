@@ -1,5 +1,7 @@
 module SeaBattleLogin {
-    requires java.net.http;
-//    requires com.fasterxml.jackson.databind;
+    requires httpclient;
+    requires httpcore;
+    requires gson;
+    requires java.sql;
     exports seaBattleLogin;
 }

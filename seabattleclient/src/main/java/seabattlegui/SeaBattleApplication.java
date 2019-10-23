@@ -929,8 +929,13 @@ public class SeaBattleApplication extends Application implements ISeaBattleGUI {
                 Square square = game.fireShot(1,x,y);
                 //Rectangle r = new Rectangle(x,y);
                 Rectangle r = squaresTargetArea[square.getPositionX()][square.getPositionY()];
-
                 setSquareColor(r,square.getState());
+
+                Square squarePc = game.fireShot(0,x,y);
+                //Rectangle r = new Rectangle(x,y);
+                Rectangle rPc = squaresOceanArea[square.getPositionX()][square.getPositionY()];
+                setSquareColor(rPc,squarePc.getState());
+
                 showMessage(square.getState().toString());
                 // Opponent's turn
                 //switchTurn();
