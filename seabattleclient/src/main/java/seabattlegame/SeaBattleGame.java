@@ -6,6 +6,7 @@ package seabattlegame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seaBattleLogin.SeaBattleLogin;
+//import seabattlecommunicatorclient.Communicator;
 import seabattlegame.classes.*;
 import seabattlegui.ISeaBattleGUI;
 import seabattlegui.ShipType;
@@ -22,8 +23,9 @@ import java.util.*;
  */
 public class SeaBattleGame implements ISeaBattleGame {
 
-  private Game game = new Game();
 
+  private Game game = new Game();
+  //private Communicator communicator = null;
   /*
   public SeaBattleGame(Rectangle[][] sqaurs) {
 
@@ -223,7 +225,7 @@ public class SeaBattleGame implements ISeaBattleGame {
  }
 
 
-  private Square getChosenSquare(List<Square> squares, int x, int y) {
+  public Square getChosenSquare(List<Square> squares, int x, int y) {
     // Loop door alle squares
     for (Square s : squares) {
       if (x == s.getPositionX() && y == s.getPositionY()) {

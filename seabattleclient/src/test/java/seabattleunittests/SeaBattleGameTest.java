@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seabattlegame.ISeaBattleGame;
 import seabattlegame.SeaBattleGame;
+import seabattlegame.classes.*;
 import seabattlegui.ShipType;
 import seabattlegui.ShotType;
 import seabattlegui.SquareState;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SeaBattleGameTest {
     
     private ISeaBattleGame game;
+    private Game game2;
     private MockSeaBattleApplication applicationPlayer;
     private MockSeaBattleApplication applicationOpponent;
     
@@ -35,8 +37,13 @@ class SeaBattleGameTest {
     void setUp() {
         
         // Create the Sea Battle game
-        //game = new SeaBattleGame();
-        
+        game = new SeaBattleGame();
+        game2 = new Game();
+        Player player = new Player("Testplayer",false);
+        Player player2 = new Player("Computer",false);
+
+        game2.addPlayer(player);
+        game2.addPlayer(player2);
         // Create mock Sea Battle GUI for player
         applicationPlayer = new MockSeaBattleApplication();
         
@@ -121,15 +128,30 @@ class SeaBattleGameTest {
 
         // Place ships automatically
         int playerNr = applicationPlayer.getPlayerNumber();
-        game.placeShip(playerNr, ShipType.SUBMARINE,1,1,true);
+        Ship ship = game.placeShip(playerNr, ShipType.SUBMARINE,1,1,true);
 
-        SquareState posX1 = applicationPlayer.getPlayerSquareState(1,1);
-        SquareState posX2 = applicationPlayer.getPlayerSquareState(2,1);
-        SquareState posX3 = applicationPlayer.getPlayerSquareState(3,1);
+        Player player = game2.getCurrentPlayerByNumber(playerNr);
+        Grid grid = player.getGrid();
+        List<Square> squares = grid.getSquares();
 
-        assertEquals(SquareState.SHIP,posX1);
-        assertEquals(SquareState.SHIP,posX2);
-        assertEquals(SquareState.SHIP,posX3);
+        Square chosenSquare = game.getChosenSquare(squares,1,1);
+
+        List<SquareState> geplaatst = new ArrayList<>();
+
+        for(int i= 0; i< 3; i++){
+            int x = chosenSquare.getPositionX()+ i;
+            Square s = game.getChosenSquare(squares,1,i);
+            s.setState(SquareState.SHIP);
+
+            if(s.getState().equals(SquareState.SHIP)){
+                geplaatst.add(SquareState.SHIP);
+            }
+        }
+        assertEquals(SquareState.SHIP,geplaatst.get(0));
+        assertEquals(SquareState.SHIP,geplaatst.get(1));
+        assertEquals(SquareState.SHIP,geplaatst.get(2));
+
+
     }
 
     @Test
@@ -139,15 +161,29 @@ class SeaBattleGameTest {
 
         // Place ships automatically
         int playerNr = applicationPlayer.getPlayerNumber();
-        game.placeShip(playerNr, ShipType.SUBMARINE,1,1,false);
+        Ship ship = game.placeShip(playerNr, ShipType.SUBMARINE,1,1,false);
 
-        SquareState posY1 = applicationPlayer.getPlayerSquareState(1,1);
-        SquareState posY2 = applicationPlayer.getPlayerSquareState(1,2);
-        SquareState posY3 = applicationPlayer.getPlayerSquareState(1,3);
+        Player player = game2.getCurrentPlayerByNumber(playerNr);
+        Grid grid = player.getGrid();
+        List<Square> squares = grid.getSquares();
 
-        assertEquals(SquareState.SHIP,posY1);
-        assertEquals(SquareState.SHIP,posY2);
-        assertEquals(SquareState.SHIP,posY3);
+        Square chosenSquare = game.getChosenSquare(squares,1,1);
+
+        List<SquareState> geplaatst = new ArrayList<>();
+
+        for(int i= 0; i< 3; i++){
+            int y = chosenSquare.getPositionY()+ i;
+            Square s = game.getChosenSquare(squares,i,1);
+            s.setState(SquareState.SHIP);
+
+            if(s.getState().equals(SquareState.SHIP)){
+                geplaatst.add(SquareState.SHIP);
+            }
+        }
+        assertEquals(SquareState.SHIP,geplaatst.get(0));
+        assertEquals(SquareState.SHIP,geplaatst.get(1));
+        assertEquals(SquareState.SHIP,geplaatst.get(2));
+
     }
 
     @Test

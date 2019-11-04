@@ -16,7 +16,7 @@ public class MockSeaBattleApplication implements ISeaBattleGUI {
     private final int XSIZE = 10;
     private final int YSIZE = 10;
     
-    private int playerNr = -1;
+    private int playerNr = 1;
     private String playerName = null;
     private String opponentName = null;
     private String errorMessage = null;
